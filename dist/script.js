@@ -12,29 +12,59 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-const accordion = (triggerSelector, itemsSelector) => {
-  const btns = document.querySelectorAll(triggerSelector);
-  btns.forEach(btn = {});
-
-  // варіант роботи з main.css(де прописані стилі поведінки активної кнопки)
-
-  // blocks = document.querySelectorAll(itemsSelector)
-  // blocks.forEach(block => {
-  //     block.classList.add('animated', 'fadeInDown')
-  // })
-
-  // btns.forEach(btn => {
-  //     btn.addEventListener('click', function(){
-  //         if(!this.classList.contains('active')){
-  //             btns.forEach(btn=> {
-  //                 btn.classList.remove('active', 'active-style')
-  //             })
-  //         this.classList.add('active', 'active-style')
-  //         }
-  //     })
-  // })
+const accordion = triggersSelector => {
+  const btns = document.querySelectorAll(triggersSelector);
+  btns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      if (!this.classList.contains('active-style')) {
+        btns.forEach(btn => {
+          btn.classList.remove('active-style');
+          btn.nextElementSibling.classList.remove('active-content');
+          btn.nextElementSibling.style.maxHeight = "0px";
+        });
+      }
+      this.classList.toggle('active-style');
+      this.nextElementSibling.classList.toggle('active-content');
+      if (this.classList.contains('active-style')) {
+        this.nextElementSibling.style.maxHeight = this.nextElementSibling.scrollHeight + 80 + "px";
+      } else {
+        this.nextElementSibling.style.maxHeight = "0px";
+      }
+    });
+  });
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (accordion);
+
+/***/ }),
+
+/***/ "./src/js/modules/burger.js":
+/*!**********************************!*\
+  !*** ./src/js/modules/burger.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const burger = (menuSelector, burgerSelector) => {
+  const menuElem = document.querySelector(menuSelector),
+    burgerElem = document.querySelector(burgerSelector);
+  menuElem.style.display = 'none';
+  burgerElem.addEventListener('click', () => {
+    if (menuElem.style.display == "none" && window.screen.availWidth < 993) {
+      menuElem.style.display = 'block';
+    } else {
+      menuElem.style.display = 'none';
+    }
+  });
+  window.addEventListener('resize', () => {
+    if (window.screen.availWidth > 992) {
+      menuElem.style.display = 'none';
+    }
+  });
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (burger);
 
 /***/ }),
 
@@ -83,58 +113,49 @@ export default calc;
 */
 
 
-const calc = (size, material, options, promocode, result) => {
-  const sizeBlock = document.querySelector(size),
-    materialBlock = document.querySelector(material),
-    optionsBlock = document.querySelector(options),
-    promocodeBlock = document.querySelector(promocode),
-    resultBlock = document.querySelector(result);
-  let sum = 0,
-    sizeValue = "",
-    materialValie = "0",
-    optionsValue = "0";
-  let state;
-  (0,_services_requests__WEBPACK_IMPORTED_MODULE_0__.getResource)('assets/calcPrice.json').then(res => {
-    state = res;
-  }).catch(e => console.log(e));
-  function changePrice(event, elem) {
-    elem.addEventListener(event, e => {
-      const target = e.target,
-        select = target.id;
-      function calcFunc(state) {
-        for (let key in state[select]) {
-          if (elem.value === key) {
-            switch (select) {
-              case "size":
-                sizeValue = state[select][key];
-                break;
-              case "material":
-                materialValie = state[select][key];
-                break;
-              case "options":
-                optionsValue = state[select][key];
-                break;
-            }
-          }
-          // console.log(state[select][key]);
-        }
-        sum = Math.round(+sizeValue * +materialValie + +optionsValue);
-        if (sizeBlock.value == '' || materialBlock.value == '') {
-          resultBlock.value = "Пожалуйста, выберите размер и материал картины";
-        } else if (promocodeBlock.value === 'IWANTPOPART') {
-          resultBlock.value = Math.round(sum * 0.7);
-        } else {
-          resultBlock.value = sum;
-        }
-        // console.log(resultBlock.value)
-      }
-      calcFunc(state);
+const calc = (sizeBlock, materialBlock, optionsBlock, promocodeBlock, resultBlock) => {
+  const size = document.querySelector(sizeBlock),
+    material = document.querySelector(materialBlock),
+    options = document.querySelector(optionsBlock),
+    inputDiscount = document.querySelector(promocodeBlock),
+    result = document.querySelector(resultBlock);
+  let sum = 0;
+  const promocod = 'IWANTPOPART';
+  function costCalculation(target) {
+    const selectTextValue = target.options[target.selectedIndex].textContent.trim();
+    target == size ? state.size = selectTextValue : false;
+    target == material ? state.material = selectTextValue : false;
+    target == options ? state.option = selectTextValue : false;
+    target == inputDiscount && inputDiscount.value != '' ? state.promocod = target.value.trim() : false;
+    sum = size.value * material.value + +options.value;
+    if (size.value == '' || material.value == '') {
+      result.textContent = 'Пожалуйста виберете размер картины и материал картины!!';
+    } else if (inputDiscount.value == promocod) {
+      result.textContent = Math.round(sum * 0.7);
+      state.totalPrice = Math.round(sum * 0.7);
+    } else {
+      state.totalPrice = sum;
+      result.textContent = sum;
+    }
+  }
+  function getValue(url, event) {
+    const target = event.target;
+    const textValue = target.options[target.selectedIndex].textContent.trim();
+    (0,_services_requests__WEBPACK_IMPORTED_MODULE_0__.getResource)(url).then(res => {
+      target.options[target.selectedIndex].setAttribute('value', res[textValue]);
+      costCalculation(target);
     });
   }
-  changePrice('change', sizeBlock);
-  changePrice('change', materialBlock);
-  changePrice('change', optionsBlock);
-  changePrice('input', promocodeBlock);
+  size.addEventListener('change', function (e) {
+    getValue('http://localhost:3000/size', e);
+  });
+  material.addEventListener('change', function (e) {
+    getValue('http://localhost:3000/material', e);
+  });
+  options.addEventListener('change', function (e) {
+    getValue('http://localhost:3000/options', e);
+  });
+  inputDiscount.addEventListener('input', costCalculation);
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (calc);
 
@@ -161,6 +182,73 @@ const checkTextInputs = selector => {
   });
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (checkTextInputs);
+
+/***/ }),
+
+/***/ "./src/js/modules/drop.js":
+/*!********************************!*\
+  !*** ./src/js/modules/drop.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const drop = () => {
+  // drag *
+  // dragend *
+  // dragenter - объект над dropArea
+  // dragexit *
+  // dragleave - объект за пределами dropArea
+  // dragover - объект зависает над dropArea
+  // dragstart *
+  // drop - объект отправлен в dropArea
+
+  const fileInputs = document.querySelectorAll('[name="upload"]');
+  ['dragenter', 'dragleave', 'dragover', 'drop'].forEach(eventName => {
+    fileInputs.forEach(input => {
+      input.addEventListener(eventName, preventDefaults, false);
+    });
+  });
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  function highlight(item) {
+    item.closest('.file_upload').style.border = "5px solid yellow";
+    item.closest('.file_upload').style.backgroundColor = "rgba(0,0,0, .7)";
+  }
+  function unhighlight(item) {
+    item.closest('.file_upload').style.border = "none";
+    if (item.closest('.calc_form')) {
+      item.closest('.file_upload').style.backgroundColor = "#fff";
+    } else {
+      item.closest('.file_upload').style.backgroundColor = "#ededed";
+    }
+  }
+  ['dragenter', 'dragover'].forEach(eventName => {
+    fileInputs.forEach(input => {
+      input.addEventListener(eventName, () => highlight(input), false);
+    });
+  });
+  ['dragleave', 'drop'].forEach(eventName => {
+    fileInputs.forEach(input => {
+      input.addEventListener(eventName, () => unhighlight(input), false);
+    });
+  });
+  fileInputs.forEach(input => {
+    input.addEventListener('drop', e => {
+      input.files = e.dataTransfer.files;
+      let dots;
+      const arr = input.files[0].name.split('.');
+      arr[0].length > 6 ? dots = "..." : dots = '.';
+      const name = arr[0].substring(0, 6) + dots + arr[1];
+      input.previousElementSibling.textContent = name;
+    });
+  });
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (drop);
 
 /***/ }),
 
@@ -232,62 +320,61 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _services_requests__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/requests */ "./src/js/services/requests.js");
 
-const forms = () => {
-  const form = document.querySelectorAll('form'),
-    // потрібне для очистки всіх input після відправки form
-    inputs = document.querySelectorAll('input'),
-    upload = document.querySelectorAll('[name="upload"]'),
-    textareas = document.querySelectorAll('textarea');
-
-  // checkNumInputs('input[name="user_phone"]')
-
-  const message = {
-    loading: 'Загрузка...',
-    success: 'Спасибо! Скоро мы с вами свяжемся',
-    failure: 'Что-то пошло не так...',
-    spinner: 'assets/img/spinner.gif',
-    ok: 'assets/img/ok.png',
-    fail: 'assets/img/fail.png'
-  };
+const forms = costPicture => {
+  const forms = document.querySelectorAll('form'),
+    input = document.querySelectorAll('input'),
+    message = {
+      loading: 'Загрузка...',
+      succses: 'Спасибо мы скоро с вами свяжемся',
+      fail: 'Что-то пошло не так...',
+      spinner: 'assets/img/spinner.gif',
+      ok: 'assets/img/ok.png',
+      failure: 'assets/img/fail.png'
+    };
+  const textArea = document.querySelector('textarea[name="message"]');
+  const fileInput = document.querySelectorAll('input[type="file"]'); // всі інпути  в які завантажуються картинки
+  const fileLoad = document.querySelectorAll('.file_upload > div'); // блок куди записується імя завантажуваного файла 
+  const size = document.querySelector('#size');
+  const material = document.querySelector('#material');
+  const options = document.querySelector('#options');
+  const resultSumCalc = document.querySelector('.calc-price');
+  fileInput.forEach((item, i) => {
+    item.addEventListener('input', () => {
+      // console.log(item.files);
+      const fileName = item.files[0].name.split('.'); //сторюється масив з двох елементів :назва картинки і розширення
+      let dots;
+      fileName[0].length > 5 ? dots = '...' : dots = '.';
+      const name = fileName[0].slice(0, 6) + dots + fileName[1];
+      fileLoad[i].textContent = name;
+    });
+  });
   const path = {
     designer: 'assets/server.php',
     question: 'assets/question.php'
   };
   const clearInputs = () => {
-    inputs.forEach(item => {
+    input.forEach(item => {
       item.value = '';
     });
-    textareas.forEach(item => {
-      item.value = '';
+    fileLoad.forEach(item => {
+      item.textContent = 'Файл не выбран';
     });
-    upload.forEach(item => {
-      item.previousElementSibling.textContent = 'Файл не обрано';
-    });
+    textArea.value = '';
+    size.selectedIndex = 0;
+    material.selectedIndex = 0;
+    options.selectedIndex = 0;
+    resultSumCalc.textContent = 'Для расчета нужно выбрать размер картины и материал картины';
   };
-  upload.forEach(item => {
-    item.addEventListener('input', () => {
-      console.log(item.files[0]);
-
-      // перевіряємо довжину имені зображення(щоб не поламало верстку)
-      let dots;
-      const arr = item.files[0].name.split('.');
-      arr[0].length > 6 ? dots = "..." : dots = '.';
-
-      // формуємо ім'я
-      const name = arr[0].substring(0, 6) + dots + arr[1];
-      item.previousElementSibling.textContent = name;
-    });
-  });
-  form.forEach(item => {
-    item.addEventListener('submit', e => {
+  forms.forEach(form => {
+    form.addEventListener('submit', e => {
       e.preventDefault();
-      let statusMessage = document.createElement('div');
+      const statusMessage = document.createElement('div');
       statusMessage.classList.add('status');
-      item.parentNode.appendChild(statusMessage);
-      item.classList.add('animated', 'fadeOutUp');
+      form.parentNode.appendChild(statusMessage);
+      form.classList.add('animated', 'fadeOutUp');
       setTimeout(() => {
-        item.style.display = 'none';
-      }, 400);
+        form.style.display = 'none';
+      }, 300);
       let statusImg = document.createElement('img');
       statusImg.setAttribute('src', message.spinner);
       statusImg.classList.add('animated', 'fadeInUp');
@@ -295,31 +382,32 @@ const forms = () => {
       let textMessage = document.createElement('div');
       textMessage.textContent = message.loading;
       statusMessage.appendChild(textMessage);
-      let price = document.querySelector('.calc-price');
-      const formData = new FormData(item);
-      if (item.getAttribute('data-calc') === 'price') {
-        formData.append("price", price.textContent);
-      }
-
-      // api для створення динамічного шляху, куди ми все будемо відправляти
+      const formDate = new FormData(form);
       let api;
-      item.closest('.popup-design') || item.classList.contains('calc_form') ? api = path.designer : api = path.question;
-      console.log(api);
-      (0,_services_requests__WEBPACK_IMPORTED_MODULE_0__.postData)(api, formData).then(res => {
+      form.closest('.popup-design') ? api = path.designer : api = path.question;
+      if (form.closest('.calc')) {
+        api = path.designer;
+        for (let key in costPicture) {
+          formDate.append(key, costPicture[key]);
+        }
+      }
+      (0,_services_requests__WEBPACK_IMPORTED_MODULE_0__.postDate)(api, formDate).then(res => {
         console.log(res);
         statusImg.setAttribute('src', message.ok);
-        textMessage.textContent = message.success;
-      }).catch(() => {
-        statusImg.setAttribute('src', message.fail);
-        textMessage.textContent = message.failure;
+        textMessage.textContent = message.succses;
+      }).catch(er => {
+        statusImg.setAttribute('src', message.failure);
+        textMessage.textContent = message.fail;
       }).finally(() => {
         clearInputs();
         setTimeout(() => {
           statusMessage.remove();
-          item.style.display = 'block';
-          item.classList.remove('fadeOutUp');
-          item.classList.add('fadeInUp');
-        }, 5000);
+          form.style.display = 'block';
+          statusImg.classList.remove('fadeInUp');
+          statusImg.classList.add('fadeOutUp');
+          form.classList.remove('fadeOutUp');
+          form.classList.add('fadeInUp');
+        }, 3000);
       });
     });
   });
@@ -339,46 +427,48 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const mask = selector => {
-  // цей селектор відмічатиме ті inputs, які потрібні для валідації
-
-  let setCursorPosition = (pos, elem) => {
-    elem.focus();
-
-    // для старих версій налаштовуємо поліфіли вручну
+  function setCursorPosition(pos, elem) {
+    elem.focus(); //вручну встановлюється focus на  інпуті
     if (elem.setSelectionRange) {
       elem.setSelectionRange(pos, pos);
     } else if (elem.createTextRange) {
+      // для IE
       let range = elem.createTextRange();
       range.collapse(true);
       range.moveEnd('character', pos);
       range.moveStart('character', pos);
       range.select();
     }
-  };
+  }
   function createMask(event) {
-    let matrix = '+3 (___) ___ __ __',
-      i = 0,
-      def = matrix.replace(/\D/g, ''),
-      val = this.value.replace(/\D/g, '');
+    let matrix = '+7 (___) ___ __ __';
+    let i = 0;
+    let def = matrix.replace(/\D/g, '');
+    let val = this.value.replace(/\D/g, ''); //  видаляє з введденого текста все що не є цифрою, і результат записується в перемінну val
     if (def.length >= val.length) {
+      // встановлюється значаення по дефолту, коли користувач клікнув на інпут і не дозволяє видалити +7
       val = def;
     }
-    this.value = matrix.replace(/./g, function (a) {
+    this.value = '+7 (___) ___-__-__'.replace(/./g, function (a) {
+      //код Івана
       return /[_\d]/.test(a) && i < val.length ? val.charAt(i++) : i >= val.length ? '' : a;
     });
     if (event.type === 'blur') {
       if (this.value.length == 2) {
+        //блок кода який спрацьовує коли інпут втрачає фокус і довжина поля інпут  == 2 тобто користувач ще сам нічого не ввів , то інпут повністю очищається
         this.value = '';
       }
     } else {
+      // блок кода яки й встановлює курсор в потрібному місці
       setCursorPosition(this.value.length, this);
     }
   }
-  let inputs = document.querySelectorAll(selector);
+  const inputs = document.querySelectorAll(selector);
   inputs.forEach(input => {
     input.addEventListener('input', createMask);
     input.addEventListener('focus', createMask);
     input.addEventListener('blur', createMask);
+    input.addEventListener('click', createMask);
   });
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (mask);
@@ -393,6 +483,7 @@ const mask = selector => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   closeAllModal: () => (/* binding */ closeAllModal),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const modals = () => {
@@ -497,6 +588,13 @@ const modals = () => {
   openByScroll('.fixed-gift');
   // showModalByTime('.popup-consultation', 5000);
 };
+function closeAllModal() {
+  document.querySelectorAll('[data-modal]').forEach(item => {
+    item.style.display = 'none';
+    item.classList.add('animated', 'fadeIn');
+  });
+}
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (modals);
 
 /***/ }),
@@ -533,6 +631,116 @@ const pictureSize = imgSelector => {
   });
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (pictureSize);
+
+/***/ }),
+
+/***/ "./src/js/modules/scrolling.js":
+/*!*************************************!*\
+  !*** ./src/js/modules/scrolling.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const scrolling = upSelector => {
+  const upElem = document.querySelector(upSelector);
+  window.addEventListener('scroll', () => {
+    if (document.documentElement.scrollTop > 1650) {
+      upElem.classList.add('animated', 'fadeIn');
+      upElem.classList.remove('fadeOut');
+    } else {
+      upElem.classList.add('fadeOut');
+      upElem.classList.remove('fadeIn');
+    }
+  });
+
+  // Scrolling with raf
+
+  let links = document.querySelectorAll('[href^="#"]'),
+    speed = 0.3;
+  links.forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.preventDefault();
+      let widthTop = document.documentElement.scrollTop,
+        hash = this.hash,
+        toBlock = document.querySelector(hash).getBoundingClientRect().top,
+        start = null;
+      requestAnimationFrame(step);
+      function step(time) {
+        if (start === null) {
+          start = time;
+        }
+        let progress = time - start,
+          r = toBlock < 0 ? Math.max(widthTop - progress / speed, widthTop + toBlock) : Math.min(widthTop + progress / speed, widthTop + toBlock);
+        document.documentElement.scrollTo(0, r);
+        if (r != widthTop + toBlock) {
+          requestAnimationFrame(step);
+        } else {
+          location.hash = hash;
+        }
+      }
+    });
+  });
+
+  // Pure js scrolling
+
+  // const element = document.documentElement,
+  //       body = document.body;
+
+  // const calcScroll = () => {
+  //     upElem.addEventListener('click', function(event) {
+  //         let scrollTop = Math.round(body.scrollTop || element.scrollTop);
+
+  //         if (this.hash !== '') {
+  //             event.preventDefault();
+  //             let hashElement = document.querySelector(this.hash),
+  //                 hashElementTop = 0;
+
+  //             while (hashElement.offsetParent) {
+  //                 hashElementTop += hashElement.offsetTop;
+  //                 hashElement = hashElement.offsetParent;
+  //             }
+
+  //             hashElementTop = Math.round(hashElementTop);
+  //             smoothScroll(scrollTop, hashElementTop, this.hash);
+  //         }
+  //     });
+  // };
+
+  // const smoothScroll = (from, to, hash) => {
+  //     let timeInterval = 1,
+  //         prevScrollTop,
+  //         speed;
+
+  //     if (to > from) {
+  //         speed = 30;
+  //     } else {
+  //         speed = -30;
+  //     }
+
+  //     let move = setInterval(function() {
+  //         let scrollTop = Math.round(body.scrollTop || element.scrollTop);
+
+  //         if (
+  //             prevScrollTop === scrollTop ||
+  //             (to > from && scrollTop >= to) ||
+  //             (to < from && scrollTop <= to)
+  //         ) {
+  //             clearInterval(move);
+  //             history.replaceState(history.state, document.title, location.href.replace(/#.*$/g, '') + hash);
+  //         } else {
+  //             body.scrollTop += speed;
+  //             element.scrollTop += speed;
+  //             prevScrollTop = scrollTop;
+  //         }
+  //     }, timeInterval);
+  // };
+
+  // calcScroll();
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (scrolling);
 
 /***/ }),
 
@@ -783,6 +991,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_filter__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./modules/filter */ "./src/js/modules/filter.js");
 /* harmony import */ var _modules_pictureSize__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./modules/pictureSize */ "./src/js/modules/pictureSize.js");
 /* harmony import */ var _modules_accordion__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/accordion */ "./src/js/modules/accordion.js");
+/* harmony import */ var _modules_burger__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./modules/burger */ "./src/js/modules/burger.js");
+/* harmony import */ var _modules_scrolling__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./modules/scrolling */ "./src/js/modules/scrolling.js");
+/* harmony import */ var _modules_drop__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./modules/drop */ "./src/js/modules/drop.js");
+
+
+
 
 
 
@@ -796,19 +1010,21 @@ __webpack_require__.r(__webpack_exports__);
 window.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
-  const statePicture = {};
   (0,_modules_modals__WEBPACK_IMPORTED_MODULE_0__["default"])();
   (0,_modules_sliders__WEBPACK_IMPORTED_MODULE_1__["default"])('.feedback-slider-item', 'horizontal', ".main-prev-btn", '.main-next-btn');
   (0,_modules_sliders__WEBPACK_IMPORTED_MODULE_1__["default"])('.main-slider-item', 'vertical');
   (0,_modules_forms__WEBPACK_IMPORTED_MODULE_2__["default"])();
-  // mask('[name="phone"]')
+  (0,_modules_mask__WEBPACK_IMPORTED_MODULE_3__["default"])('[name="phone"]');
   (0,_modules_checkTextInputs__WEBPACK_IMPORTED_MODULE_4__["default"])('[name="name"]');
   (0,_modules_checkTextInputs__WEBPACK_IMPORTED_MODULE_4__["default"])('[name="message"]');
   (0,_modules_showMoreStyles__WEBPACK_IMPORTED_MODULE_5__["default"])('.button-styles', '#styles .row');
   (0,_modules_calc__WEBPACK_IMPORTED_MODULE_6__["default"])('#size', '#material', '#options', '.promocode', '.calc-price');
   (0,_modules_filter__WEBPACK_IMPORTED_MODULE_7__["default"])();
   (0,_modules_pictureSize__WEBPACK_IMPORTED_MODULE_8__["default"])('.sizes-block');
-  (0,_modules_accordion__WEBPACK_IMPORTED_MODULE_9__["default"])('.accordion-heading', '.accordion-block');
+  (0,_modules_accordion__WEBPACK_IMPORTED_MODULE_9__["default"])('.accordion-heading');
+  (0,_modules_burger__WEBPACK_IMPORTED_MODULE_10__["default"])('.burger-menu', '.burger');
+  (0,_modules_scrolling__WEBPACK_IMPORTED_MODULE_11__["default"])('.pageup');
+  (0,_modules_drop__WEBPACK_IMPORTED_MODULE_12__["default"])();
 });
 })();
 

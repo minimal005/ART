@@ -22,13 +22,13 @@ const showMoreStyles = (trigger, wrapper) => {
 
         // ---------------------Робота з json-server і db.json. Прописуємо в терміналі json-server--------------
     
-        btn.addEventListener('click', function () {
-            getResource('http://localhost:3000/styles')
-            .then(res => createCards(res))
-            .catch(error => console.log(error))
-
-            this.remove()
-        })
+        btn.addEventListener('click', function() {
+            getResource('assets/db.json')
+                .then(res => createCards(res.styles))
+                .catch(error => console.log(error));
+    
+            this.remove();
+        });
 
         // Можна прописати альтернативно, без локальної адреси json-server
         // btn.addEventListener('click', function () {
@@ -59,3 +59,4 @@ const showMoreStyles = (trigger, wrapper) => {
     };
     
     export default showMoreStyles;
+    

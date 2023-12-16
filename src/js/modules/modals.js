@@ -120,5 +120,12 @@ const modals = () => {
         openByScroll('.fixed-gift');
         // showModalByTime('.popup-consultation', 5000);
     };
+    function closeAllModal() {
+        document.querySelectorAll('[data-modal]').forEach(item => {
+            item.style.display = 'none';
+            item.classList.add('animated', 'fadeIn');
     
+        });
+    }
+    export { closeAllModal };
     export default modals
