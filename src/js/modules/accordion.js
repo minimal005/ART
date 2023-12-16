@@ -14,10 +14,6 @@ const accordion = (triggersSelector) => {
         });
     });
 
-
-
-        
-
         // варіант роботи з main.css(де прописані стилі поведінки активної кнопки)
 
         // blocks = document.querySelectorAll(itemsSelector)
